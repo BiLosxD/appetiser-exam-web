@@ -74,7 +74,8 @@
 					prev_date = this.$moment(`${year}-${(month - 1 == 0) ? 12 : month - 1}`, 'YYYY-MM').daysInMonth(),
 					end_date = this.$moment(`${year}-${month}`, 'YYYY-MM').daysInMonth(),
 					calendar = document.querySelector(`.${this.attr.table} tbody`),
-					current = this.$moment(`${year}-${month}-${start_date}`, 'YYYY-MM-D').format('d')
+					current = this.$moment(`${year}-${month}-${start_date}`, 'YYYY-MM-D').format('d'),
+					excess = 0
 
 				for (let i = 0; i < 6; i++) {
 					let table_row = document.createElement('tr')
@@ -82,9 +83,9 @@
 						if (start_date <= end_date) {
 							if (this.$moment(`${year}-${month}-${start_date}`, 'YYYY-MM-D').format('d') == j) {
 								table_row.innerHTML += `
-									<td id="__c${i}" class='${this.attr.day} ${this.attr.pointer}'>
+									<td id="day_${start_date}" class='${this.attr.day} ${this.attr.pointer}'>
 										<div class='header_wrapper'>
-											<div id="day_${start_date}" class="header_day_wrapper">
+											<div class="header_day_wrapper">
 												<div class='header_day'>${start_date}</div>
 											</div>
 										</div>
@@ -98,6 +99,7 @@
 								} else {
 									prev_date = prev_date - current
 								}
+								excess++
 								table_row.innerHTML += `
 									<td class='${this.attr.day} ${this.attr.disable}'>
 										<div class='header_wrapper'>
@@ -129,6 +131,28 @@
 					}
 					calendar.appendChild(table_row)
 				}
+				setTimeout( () => {
+					this.clickDates(0, end_date, excess)
+				}, 1000)
+			},
+			clickDates (startNum, endNum, firstDayExcess) {
+				const me = this
+				let month = me.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('M')
+				let year = me.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('YYYY')
+				do {
+					startNum++
+					let elementDay = (document.getElementById(`day_${startNum}`) != null) ? document.getElementById(`day_${startNum}`) : null
+					/**
+					 * Day **/
+					if (elementDay != null) {
+						/**
+						* Toggle Day Overlay **/
+						elementDay.addEventListener('click', (e) => {
+							let target = this
+							this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Event clicked!', type: 'success' } })
+						})
+					}
+				} while (startNum < endNum + firstDayExcess)
 			},
 			generatePrevCalendar () {
 				this.date.month = this.date.month - 1

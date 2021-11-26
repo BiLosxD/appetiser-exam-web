@@ -32,14 +32,12 @@
 								:color="'#438EFF'"
 								:id="'from'"
 							></v-ctk>
-							<transition name="slide">
-								<validation-template
-									:payload="{
-										errors: errors,
-										model: form_data.from
-									}"
-								/>
-							</transition>
+							<validation-template
+								:payload="{
+									errors: errors,
+									model: form_data.from
+								}"
+							/>
 						</div>
 					</ValidationProvider>
 					<ValidationProvider tag="div" :class="attr.group" name="to date" :rules="{ required: true }" v-slot="{ errors }">
@@ -58,35 +56,31 @@
 								:id="'to'"
 								:min-date="$moment(form_data.from).format('YYYY-MM-DD')"
 							></v-ctk>
-							<transition name="slide">
-								<validation-template
-									:payload="{
-										errors: errors,
-										model: form_data.to
-									}"
-								/>
-							</transition>
+							<validation-template
+								:payload="{
+									errors: errors,
+									model: form_data.to
+								}"
+							/>
 						</div>
 					</ValidationProvider>
 				</div>
 
-				<ValidationProvider tag="div" :class="[ attr.group_flex, attr.four ]" name="days" :rules="{ required: true }" v-slot="{ errors }">
+				<div :class="[ attr.group_flex, attr.four ]">
 					<div :class="attr.group" v-for="(day, key) in days" :key="key">
 						<div :class="attr.checkbox">
-							<input type="checkbox" :class="attr.check" :name="`day_${key}`" :id="`day_${key}`">
-							<label :for="`day_${key}`" :class="attr.pointer">{{ day }}</label>
+							<input type="checkbox" :class="attr.check" :name="`days_${key}`" :id="`days_${key}`" @change="getDay(day)">
+							<label :for="`days_${key}`" :class="attr.pointer">{{ day }}</label>
 						</div>
 					</div>
-					<transition name="slide">
-						<validation-template
-							:payload="{
-								errors: errors,
-								model: form_data.days,
-								adjusted: 'adjusted'
-							}"
-						/>
-					</transition>
-				</ValidationProvider>
+					<validation-template
+						:payload="{
+							errors: (validate.days) ? '' : ['The days field is required.'],
+							model: form_data.days,
+							adjusted: 'adjusted'
+						}"
+					/>
+				</div>
 
 				<div :class="attr.action">
 					<button-template
@@ -104,6 +98,9 @@
 <script>
 	export default {
 		data: () => ({
+			validate: {
+				days: true
+			},
 			form_data: {
 				event_name: '',
 				from: '',
@@ -113,9 +110,29 @@
 			days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 		}),
 		methods: {
+			getDay (data=null) {
+				if (data) {
+					if (this.form_data.days.includes(data)) {
+						for (let i = 0, len = this.form_data.days.length; i < len; i++) {
+							if (data == this.form_data.days[i]) {
+								this.form_data.days.splice(i, 1)
+							}
+						}
+						if (this.form_data.days.length <= 0) {
+							this.validate.days = false
+						}
+					} else {
+						this.validate.days = true
+						this.form_data.days.push(data)
+					}
+				} else {
+					this.validate.days = (this.form_data.days.length > 0) ? true : false
+				}
+			},
 			submit () {
 				this.$refs.form.validate().then(success => {
 					if (!success) {
+						this.getDay()
 						this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Please fill out the fields.', type: 'error' } })
 					} else {
 						// this.toggleModalStatus({ type: 'loader', status: true })
