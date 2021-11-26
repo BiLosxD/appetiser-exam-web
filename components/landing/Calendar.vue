@@ -26,18 +26,14 @@
 					</div>
 				</div>
 				<div :class="attr.bottom">
-					<button-template
-						:label="'Save Event'"
-						:link_status="2"
-						@click.native.prevent
-					/>
+					<event-form />
 				</div>
 			</div>
 			<div :class="attr.right">
 				<button-template
 					:class="attr.mb"
 					:label="'This Month'"
-					:link_status="2"
+					:status="2"
 					:full_width="true"
 					:template="'template_2'"
 					@click.native="generateCalendar(date.year = $moment().year(), date.month = $moment().month() + 1)"
@@ -45,11 +41,10 @@
 				<table :class="attr.table">
 					<thead>
 						<tr>
-							<th :class="attr.header" v-for="(dayLabel, key) in dayLabels" :key="key">{{ dayLabel }}</th>
+							<th :class="attr.header" v-for="(day, key) in days" :key="key">{{ day }}</th>
 						</tr>
 					</thead>
-					<tbody>
-					</tbody>
+					<tbody></tbody>
 				</table>
 			</div>
 		</div>
@@ -58,6 +53,9 @@
 
 <script>
 	export default {
+		components: {
+			EventForm: () => import('~/components/landing/EventForm')
+		},
 		data: ({ $moment }) => ({
 			date: {
 				year: $moment().year(),
@@ -65,7 +63,7 @@
 			},
 			full_date: '',
 			yearName: '',
-			dayLabels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+			days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 		}),
 		methods: {
 			generateCalendar (year, month) {
@@ -84,8 +82,8 @@
 						if (start_date <= end_date) {
 							if (this.$moment(`${year}-${month}-${start_date}`, 'YYYY-MM-D').format('d') == j) {
 								table_row.innerHTML += `
-									<td id="__c${i}" class='${this.attr.day}'>
-										<div class='header_wrapper alt'>
+									<td id="__c${i}" class='${this.attr.day} ${this.attr.pointer}'>
+										<div class='header_wrapper'>
 											<div id="day_${start_date}" class="header_day_wrapper">
 												<div class='header_day'>${start_date}</div>
 											</div>
@@ -138,7 +136,7 @@
 					this.date.month = 12
 					this.date.year = this.date.year - 1
 				}
-				this.generateCalendar(this.date.year, this.date.month, 0, 0)
+				this.generateCalendar(this.date.year, this.date.month)
 			},
 			generateNextCalendar () {
 				this.date.month = this.date.month + 1
@@ -146,7 +144,7 @@
 					this.date.month = 1
 					this.date.year = this.date.year + 1
 				}
-				this.generateCalendar(this.date.year, this.date.month, 0, 0)
+				this.generateCalendar(this.date.year, this.date.month)
 			},
 			clearTableRows () {
 				document.querySelectorAll(`.${this.attr.table} tbody tr`).forEach((e) => {
@@ -169,12 +167,14 @@
 		color: var(--theme_white)
 		font-size: 18px
 		font-weight: var(--med)
-		padding: 10px
+		padding: 20px 10px
 		text-align: center
-		animation: fade 1s
-		&.disable
-			color: rgba(255, 255, 255, 0.65)
+		transition: .3s ease-in-out
+		&:hover
 			background-color: var(--theme_tertiary)
+		&.disable
+			color: rgba(255, 255, 255, 0.5)
+			background-color: var(--theme_secondary)
 	#calendar
 		height: inherit
 		position: relative
@@ -185,13 +185,14 @@
 			display: flex
 			flex-flow: row wrap
 			width: 100%
-			max-width: 1280px
+			max-width: 1366px
 			margin: 0 auto
 			border-radius: 12px
 			border: 2px solid var(--theme_secondary)
 			background-color: var(--theme_white)
 			box-shadow: 0 0 20px rgba(0, 0, 0, 0.1)
 			.left
+				position: relative
 				flex: 0 0 40%
 				border-right: 2px solid var(--theme_secondary)
 				.top
@@ -240,6 +241,7 @@
 				border-radius: 0 10px 10px 0
 				background-color: var(--theme_primary)
 				.table
+					animation: fade 1s
 					.header
 						font-size: 18px
 						font-weight: var(--bold)

@@ -19,6 +19,7 @@
 	"@nuxtjs/dotenv": "^1.4.1",
 	"stylus": "^0.55.0",
     "stylus-loader": "^4.3.3",
-    "vee-validate": "^3.4.13"
+    "vee-validate": "^3.4.13",
+	"vue-ctk-date-time-picker": "^2.5.0"
   }
 }

@@ -32,6 +32,7 @@
 		--theme_white_v2: #f9f7f4
 		--theme_black: #000
 		--theme_gray: #ebebeb
+		--theme_gray_v2: #bfbfbf
 		--theme_primary: #02afa0
 		--theme_secondary: #1E9188
 		--theme_tertiary: #3cbbb1
@@ -117,19 +118,19 @@
 		background-color: transparent
 
 	::-webkit-input-placeholder
-		color: var(--theme_gray)
+		color: rgba(0, 0, 0, 0.5)
 		font-weight: var(--reg)
 		font-size: 14px
 		text-transform: none
 
 	:-ms-input-placeholder
-		color: var(--theme_gray)
+		color: rgba(0, 0, 0, 0.5)
 		font-weight: var(--reg)
 		font-size: 14px
 		text-transform: none
 
 	::placeholder
-		color: var(--theme_gray)
+		color: rgba(0, 0, 0, 0.5)
 		font-weight: var(--reg)
 		font-size: 14px
 		text-transform: none

@@ -124,7 +124,7 @@
 			border: 2px solid var(--theme_info)
 			background-color: var(--theme_info)
 			&:hover
-				background-color: rgba(246, 147, 49, 0.1)
+				background-color: var(--theme_white)
 				span
 					color: var(--theme_info)
 		&.template_2

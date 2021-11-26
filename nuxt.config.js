@@ -45,6 +45,10 @@ export default {
 			ssr: false
 		},
 		{
+			src: '~/plugins/vue-ctk-date-time-picker',
+			ssr: false
+		},
+		{
 			src: '~/plugins/vue-moment'
 		},
 		{
