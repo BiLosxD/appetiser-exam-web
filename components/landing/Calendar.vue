@@ -135,24 +135,19 @@
 					this.clickDates(0, end_date, excess)
 				}, 1000)
 			},
-			clickDates (startNum, endNum, firstDayExcess) {
-				const me = this
-				let month = me.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('M')
-				let year = me.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('YYYY')
+			clickDates (start, end, excess) {
+				let month = this.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('M'),
+					year = this.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('YYYY')
 				do {
-					startNum++
-					let elementDay = (document.getElementById(`day_${startNum}`) != null) ? document.getElementById(`day_${startNum}`) : null
-					/**
-					 * Day **/
-					if (elementDay != null) {
-						/**
-						* Toggle Day Overlay **/
-						elementDay.addEventListener('click', (e) => {
+					start++
+					let day = (document.getElementById(`day_${start}`) != null) ? document.getElementById(`day_${start}`) : null
+					if (day != null) {
+						day.addEventListener('click', (e) => {
 							let target = this
 							this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Event clicked!', type: 'success' } })
 						})
 					}
-				} while (startNum < endNum + firstDayExcess)
+				} while (start < end + excess)
 			},
 			generatePrevCalendar () {
 				this.date.month = this.date.month - 1

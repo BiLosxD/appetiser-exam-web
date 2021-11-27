@@ -31,6 +31,7 @@
 								:label="'Select a date'"
 								:color="'#438EFF'"
 								:id="'from'"
+								@input="getDate($event, 'start')"
 							></v-ctk>
 							<validation-template
 								:payload="{
@@ -55,6 +56,7 @@
 								:color="'#438EFF'"
 								:id="'to'"
 								:min-date="$moment(form_data.from).format('YYYY-MM-DD')"
+								@input="getDate($event, 'end')"
 							></v-ctk>
 							<validation-template
 								:payload="{
@@ -66,21 +68,23 @@
 					</ValidationProvider>
 				</div>
 
-				<div :class="[ attr.group_flex, attr.four ]">
-					<div :class="attr.group" v-for="(day, key) in days" :key="key">
-						<div :class="attr.checkbox">
-							<input type="checkbox" :class="attr.check" :name="`days_${key}`" :id="`days_${key}`" @change="getDay(day)">
-							<label :for="`days_${key}`" :class="attr.pointer">{{ day }}</label>
+				<template v-if="range.start && range.end">
+					<div :class="[ attr.group_flex, attr.four ]">
+						<div :class="attr.group" v-for="(day, key) in populateDays" :key="key">
+							<div :class="attr.checkbox">
+								<input type="checkbox" :class="attr.check" :name="`days_${key}`" :id="`days_${key}`" :key="key" @change="getDay(day)">
+								<label :for="`days_${key}`" :class="attr.pointer">{{ day }}</label>
+							</div>
 						</div>
+						<validation-template
+							:payload="{
+								errors: (validate.days) ? '' : ['The days field is required.'],
+								model: form_data.days,
+								adjusted: 'adjusted'
+							}"
+						/>
 					</div>
-					<validation-template
-						:payload="{
-							errors: (validate.days) ? '' : ['The days field is required.'],
-							model: form_data.days,
-							adjusted: 'adjusted'
-						}"
-					/>
-				</div>
+				</template>
 
 				<div :class="attr.action">
 					<button-template
@@ -101,16 +105,57 @@
 			validate: {
 				days: true
 			},
+			range: {
+				start: '',
+				end: ''
+			},
 			form_data: {
 				event_name: '',
 				from: '',
 				to: '',
 				days: []
 			},
-			days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+			days: []
 		}),
+		computed: {
+			populateDays () {
+				let result = []
+
+				this.days.forEach((item, key) => {
+					result.push(item)
+				})
+
+				return result
+			}
+		},
 		methods: {
-			getDay (data=null) {
+			getDate (event, type) {
+				switch (type) {
+					case 'start':
+						this.range.start = event
+						this.range.end = ''
+						this.form_data.to = ''
+						break
+					case 'end':
+						this.range.end = event
+						break
+				}
+
+				if (type == 'end') {
+					this.days = []
+					this.form_data.days = []
+					setTimeout(() => {
+						let diff = this.$moment(this.form_data.to, 'YYYY-MM-DD').diff(this.$moment(this.form_data.from, 'YYYY-MM-DD'), 'days'),
+							days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+						for (let i = 0; i <= diff; i++) {
+							if (this.days.length < 7) {
+								this.days.push(days[i])
+							}
+						}
+					}, 10)
+				}
+			},
+			getDay (data = null) {
 				if (data) {
 					if (this.form_data.days.includes(data)) {
 						for (let i = 0, len = this.form_data.days.length; i < len; i++) {
@@ -135,6 +180,7 @@
 						this.getDay()
 						this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Please fill out the fields.', type: 'error' } })
 					} else {
+						console.log(this.form_data);
 						// this.toggleModalStatus({ type: 'loader', status: true })
 						//
 						// this.$auth.loginWith('local', { data: this.form_data }).then(({ data }) => {
@@ -253,7 +299,7 @@
 			transition: .3s ease-in-out
 			&:hover,
 			&.filled
-				border: 1px solid var(--theme_primary)
+				border: 1px solid var(--theme_info)
 		.action
 			position: absolute
 			left: 0
