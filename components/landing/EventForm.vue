@@ -70,7 +70,7 @@
 
 				<template v-if="range.start && range.end">
 					<div :class="[ attr.group_flex, attr.four ]">
-						<div :class="attr.group" v-for="(day, key) in populateDays" :key="key">
+						<div :class="attr.group" v-for="(day, key) in days" :key="key">
 							<div :class="attr.checkbox">
 								<input type="checkbox" :class="attr.check" :name="`days_${key}`" :id="`days_${key}`" :key="key" @change="getDay(day)">
 								<label :for="`days_${key}`" :class="attr.pointer">{{ day }}</label>
@@ -117,17 +117,6 @@
 			},
 			days: []
 		}),
-		computed: {
-			populateDays () {
-				let result = []
-
-				this.days.forEach((item, key) => {
-					result.push(item)
-				})
-
-				return result
-			}
-		},
 		methods: {
 			getDate (event, type) {
 				switch (type) {
@@ -218,6 +207,8 @@
 			.field-input
 				border: 1px solid var(--theme_info)
 		.field-input
+			height: 40px
+			min-height: 40px
 			border: 1px solid var(--theme_gray_v2)
 			font-size: 16px
 			color: var(--theme_black)
