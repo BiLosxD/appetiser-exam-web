@@ -54,16 +54,31 @@
 				</table>
 			</div>
 		</div>
+
+		<transition name="fade">
+			<template v-if="toggle.event_list">
+				<event-list
+					:payload="event_payload"
+				/>
+			</template>
+		</transition>
 	</div>
 </template>
 
 <script>
 	export default {
 		components: {
-			EventForm: () => import('~/components/landing/EventForm')
+			EventForm: () => import('~/components/landing/EventForm'),
+			EventList: () => import('~/components/landing/modal/EventList')
 		},
 		data: ({ $moment }) => ({
 			records: null,
+			toggle: {
+				event_list: false
+			},
+			event_payload: {
+				list: []
+			},
 			event_ctr: 0,
 			date: {
 				year: $moment().year(),
@@ -95,12 +110,10 @@
 								if (this.$moment(`${year}-${month}-${start_date}`, 'YYYY-MM-D').format('d') == j) {
 									table_row.innerHTML += `
 										<td id="day_${start_date}" class='${this.attr.day} ${this.attr.pointer}'>
-											<div class='header_wrapper'>
-												<div class="header_day_wrapper">
-													<div class='header_day'>${start_date}</div>
-												</div>
+											<p class="${this.attr.no_point}">${start_date}</p>
+											<ul class="${this.attr.events}  ${this.attr.no_point}">
 												${this.populateCalendar(start_date)}
-											</div>
+											</ul>
 										</td>`
 									start_date++
 								} else {
@@ -114,9 +127,7 @@
 									excess++
 									table_row.innerHTML += `
 										<td class='${this.attr.day} ${this.attr.disable}'>
-											<div class='header_wrapper'>
-												<div class='header_day'>${prev_date}</div>
-											</div>
+											<p>${prev_date}</p>
 										</td>`
 								}
 							} else {
@@ -124,18 +135,14 @@
 									if (i == 4) {
 										table_row.innerHTML += `
 											<td id="__c${i}" class='${this.attr.day} ${this.attr.disable}'>
-												<div class='header_wrapper'>
-													<div class='header_day'>${next_date}</div>
-												</div>
+												<p>${next_date}</p>
 											</td>`
 										next_date++
 									}
 								} else {
 									table_row.innerHTML += `
 										<td id="__c${i}" class='${this.attr.day} ${this.attr.disable}'>
-											<div class='header_wrapper'>
-												<div class='header_day'>${next_date}</div>
-											</div>
+											<p>${next_date}</p>
 										</td>`
 									next_date++
 								}
@@ -145,29 +152,28 @@
 					}
 					setTimeout( () => {
 						this.clickDates(0, end_date, excess)
-					}, 1000)
+					}, 500)
 				})
 			},
 			populateCalendar (date) {
 				let result = ''
 				this.records.forEach((data, index) => {
-					let scheduleCurrent = this.$moment(data.date).format('D')
-					if (date == scheduleCurrent) {
-						result += `<div class='${this.attr.clamp}'>${data.title}</div>`
+					let current = this.$moment(data.date).format('D')
+					if (date == current) {
+						result += `<li class='${this.attr.event}'>${data.title}</li>`
 					}
 				})
 				return result
 			},
 			clickDates (start, end, excess) {
-				let month = this.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('M'),
-					year = this.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('YYYY')
 				do {
 					start++
 					let day = (document.getElementById(`day_${start}`) != null) ? document.getElementById(`day_${start}`) : null
 					if (day != null) {
 						day.addEventListener('click', (e) => {
-							let target = this
-							this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Event clicked!', type: 'success' } })
+							let target = e.target.querySelector(`.${this.attr.events}`)
+							this.event_payload.list = Array.from(target.querySelectorAll('li')).map(item => item.innerHTML)
+							this.toggle.event_list = true
 						})
 					}
 				} while (start < end + excess)
@@ -208,23 +214,28 @@
 </script>
 
 <style lang="stylus" module="attr">
+	.no_point
+		pointer-events: none
 	.pointer
 		cursor: pointer
-	.clamp
-		display: -webkit-box
-		-webkit-box-orient: vertical
-		overflow: hidden
-		text-overflow: ellipsis
-		-webkit-line-clamp: 1
-		border-radius: 10px
-		padding: 2px 5px
-		background-color: var(--theme_white)
-		color: var(--theme_primary)
-		margin-bottom: 5px
-		font-size: 15px
-		font-weight: var(--bold)
-		&:last-child
-			margin-bottom: 0
+	.events
+		list-style: none
+		padding: 0
+		.event
+			display: -webkit-box
+			-webkit-box-orient: vertical
+			overflow: hidden
+			text-overflow: ellipsis
+			-webkit-line-clamp: 1
+			border-radius: 10px
+			padding: 2px 5px
+			background-color: var(--theme_white)
+			color: var(--theme_primary)
+			margin-bottom: 5px
+			font-size: 15px
+			font-weight: var(--bold)
+			&:last-child
+				margin-bottom: 0
 	.mb
 		margin-bottom: 20px
 	.day
