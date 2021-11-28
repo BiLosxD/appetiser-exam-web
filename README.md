@@ -1,4 +1,15 @@
-# web
+# Appetiser Coding Challenge
+
+### `Struture`
+### NuxtJS
+### Modular type of structure
+### CSS Obsfucation
+### Customized calendar viewer
+### Validation of the form and negative scenarios
+### Dynamic day picker
+### Can add event and override the existing events
+
+---------
 
 ## Build Setup
 
