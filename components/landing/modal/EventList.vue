@@ -1,8 +1,8 @@
 <template lang="html">
 	<div :id="attr.modal">
-		<div :class="attr.backdrop" @click="$parent.toggle.event_list = false"></div>
+		<div :class="attr.backdrop" @click="close()"></div>
 		<div :class="attr.content">
-			<div :class="[ attr.close, attr.pointer ]" @click="$parent.toggle.event_list = false">
+			<div :class="[ attr.close, attr.pointer ]" @click="close()">
 				<svg xmlns="http://www.w3.org/2000/svg" width="22.468" height="22.468" viewBox="0 0 22.468 22.468">
 					<path d="M29.968,9.763,27.705,7.5l-8.971,8.971L9.763,7.5,7.5,9.763l8.971,8.971L7.5,27.705l2.263,2.263L18.734,21l8.971,8.971,2.263-2.263L21,18.734Z" transform="translate(-7.5 -7.5)"/>
 				</svg>
@@ -26,6 +26,12 @@
 			payload: {
 				type: Object/Array,
 				default: null
+			}
+		},
+		methods: {
+			close () {
+				this.$parent.toggle.event_list = false
+				document.body.classList.remove('no_scroll')
 			}
 		},
 		mounted () {
@@ -114,6 +120,6 @@
 				.title
 					font-size: 20px
 				.desc
-					font-size: 14px
-					padding-right: 0
+					*
+						font-size: 14px
 </style>

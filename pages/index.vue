@@ -27,4 +27,9 @@
 		position: relative
 		height: 100vh
 		background-color: var(--theme_white_v2)
+	/**
+	 * 1024px - 280px */
+	@media (max-width: 1024px) and (min-width: 280px)
+		#page
+			height: 100%
 </style>

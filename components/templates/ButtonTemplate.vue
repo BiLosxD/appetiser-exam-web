@@ -157,7 +157,7 @@
 			transition: .3s cubic-bezier(.17,.67,.77,1)
 	@media (max-width: 1024px) and (min-width: 280px)
 		.button
-			padding: 10px 20px
+			padding: 10px 5px
 			span
 				font-size: 14px
 		@media (max-width: 310px) and (min-width: 280px)

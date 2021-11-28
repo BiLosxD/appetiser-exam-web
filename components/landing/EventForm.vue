@@ -89,14 +89,14 @@
 				<div :class="attr.action">
 					<button-template
 						:class="attr.custom"
-						:label="'Add Event'"
+						:label="'Add'"
 						:full_width="true"
 						:status="2"
 						@click.native="submit(0)"
 					/>
 					<button-template
 						:class="attr.custom"
-						:label="'Override All Events'"
+						:label="'Override'"
 						:template="'template_3'"
 						:full_width="true"
 						:status="2"
@@ -312,4 +312,35 @@
 			justify-content: space-between
 			.custom
 				flex: 0 0 48.66%
+	/**
+	 * 1366px - 1025px */
+	@media (max-width: 1366px) and (min-width: 1025px)
+		#form
+			.group_flex
+				&.four
+					.group
+						flex: 0 0 calc((100% / 3) - 10px)
+						margin-bottom: 30px
+				.group
+					flex: 0 0 100%
+	/**
+	 * 1024px - 280px */
+	@media (max-width: 1024px) and (min-width: 280px)
+		#form
+			.action
+				max-width: 100%
+				position: static
+				.custom
+					flex: 0 0 calc(50% - 10px)
+		/**
+		 * 767px - 280px */
+		@media (max-width: 767px) and (min-width: 280px)
+			#form
+				.group_flex
+					&.four
+						.group
+							flex: 0 0 calc((100% / 2) - 10px)
+							margin-bottom: 30px
+					.group
+						flex: 0 0 100%
 </style>

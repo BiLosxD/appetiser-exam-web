@@ -329,4 +329,36 @@
 			opacity: 0
 		to
 			opacity: 1
+	/**
+	 * 1366px - 1025px */
+	@media (max-width: 1366px) and (min-width: 1025px)
+		#calendar
+			padding: 20px
+			.container
+				max-width: 100%
+	/**
+	 * 1024px - 280px */
+	@media (max-width: 1024px) and (min-width: 280px)
+		.day
+			font-size: 14px
+		.events
+			.event
+				font-size: 14px
+		#calendar
+			height: 100%
+			padding: 20px
+			.container
+				max-width: 100%
+				.left,
+				.right
+					flex: 0 0 100%
+				.left
+					border-right: none
+					.top
+						border-radius: 10px 10px 0 0
+				.right
+					border-radius: 0 0 10px 10px
+					.table
+						.header
+							font-size: 14px
 </style>

@@ -53,6 +53,8 @@
 	 * 767px - 280px */
 	@media (max-width: 767px) and (min-width: 280px)
 		.validate
+			&.adjusted
+				bottom: 5px
 			.text
 				font-size: 10px
 </style>
