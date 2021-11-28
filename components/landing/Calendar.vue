@@ -26,7 +26,13 @@
 					</div>
 				</div>
 				<div :class="attr.bottom">
-					<event-form />
+					<event-form
+						ref="event_form"
+						:key="event_ctr"
+						:payload="{
+							date: `${date.year}-${date.month}-01`
+						}"
+					/>
 				</div>
 			</div>
 			<div :class="attr.right">
@@ -57,6 +63,8 @@
 			EventForm: () => import('~/components/landing/EventForm')
 		},
 		data: ({ $moment }) => ({
+			records: null,
+			event_ctr: 0,
 			date: {
 				year: $moment().year(),
 				month: $moment().month() + 1
@@ -77,39 +85,52 @@
 					current = this.$moment(`${year}-${month}-${start_date}`, 'YYYY-MM-D').format('d'),
 					excess = 0
 
-				for (let i = 0; i < 6; i++) {
-					let table_row = document.createElement('tr')
-					for (let j = 0; j < 7; j++) {
-						if (start_date <= end_date) {
-							if (this.$moment(`${year}-${month}-${start_date}`, 'YYYY-MM-D').format('d') == j) {
-								table_row.innerHTML += `
-									<td id="day_${start_date}" class='${this.attr.day} ${this.attr.pointer}'>
-										<div class='header_wrapper'>
-											<div class="header_day_wrapper">
-												<div class='header_day'>${start_date}</div>
+				this.$axios.$get(`events?date=${year}-${month}`).then(({ records }) => {
+					this.records = records
+
+					for (let i = 0; i < 6; i++) {
+						let table_row = document.createElement('tr')
+						for (let j = 0; j < 7; j++) {
+							if (start_date <= end_date) {
+								if (this.$moment(`${year}-${month}-${start_date}`, 'YYYY-MM-D').format('d') == j) {
+									table_row.innerHTML += `
+										<td id="day_${start_date}" class='${this.attr.day} ${this.attr.pointer}'>
+											<div class='header_wrapper'>
+												<div class="header_day_wrapper">
+													<div class='header_day'>${start_date}</div>
+												</div>
+												${this.populateCalendar(start_date)}
 											</div>
-										</div>
-									</td>`
-								start_date++
-							} else {
-								prev_date = this.$moment(`${year}-${(month - 1 == 0) ? 12 : month - 1}`, 'YYYY-MM').daysInMonth()
-								current--
-								if (current <= 0) {
-									prev_date = this.$moment(`${year}-${(month - 1 == 0) ? 12 : month - 1}`, 'YYYY-MM').daysInMonth()
+										</td>`
+									start_date++
 								} else {
-									prev_date = prev_date - current
+									prev_date = this.$moment(`${year}-${(month - 1 == 0) ? 12 : month - 1}`, 'YYYY-MM').daysInMonth()
+									current--
+									if (current <= 0) {
+										prev_date = this.$moment(`${year}-${(month - 1 == 0) ? 12 : month - 1}`, 'YYYY-MM').daysInMonth()
+									} else {
+										prev_date = prev_date - current
+									}
+									excess++
+									table_row.innerHTML += `
+										<td class='${this.attr.day} ${this.attr.disable}'>
+											<div class='header_wrapper'>
+												<div class='header_day'>${prev_date}</div>
+											</div>
+										</td>`
 								}
-								excess++
-								table_row.innerHTML += `
-									<td class='${this.attr.day} ${this.attr.disable}'>
-										<div class='header_wrapper'>
-											<div class='header_day'>${prev_date}</div>
-										</div>
-									</td>`
-							}
-						} else {
-							if (this.$moment(`${year}-${month}-${1}`, 'YYYY-MM-D').format('d') == 0) {
-								if (i == 4) {
+							} else {
+								if (this.$moment(`${year}-${month}-${1}`, 'YYYY-MM-D').format('d') == 0) {
+									if (i == 4) {
+										table_row.innerHTML += `
+											<td id="__c${i}" class='${this.attr.day} ${this.attr.disable}'>
+												<div class='header_wrapper'>
+													<div class='header_day'>${next_date}</div>
+												</div>
+											</td>`
+										next_date++
+									}
+								} else {
 									table_row.innerHTML += `
 										<td id="__c${i}" class='${this.attr.day} ${this.attr.disable}'>
 											<div class='header_wrapper'>
@@ -118,22 +139,24 @@
 										</td>`
 									next_date++
 								}
-							} else {
-								table_row.innerHTML += `
-									<td id="__c${i}" class='${this.attr.day} ${this.attr.disable}'>
-										<div class='header_wrapper'>
-											<div class='header_day'>${next_date}</div>
-										</div>
-									</td>`
-								next_date++
 							}
 						}
+						calendar.appendChild(table_row)
 					}
-					calendar.appendChild(table_row)
-				}
-				setTimeout( () => {
-					this.clickDates(0, end_date, excess)
-				}, 1000)
+					setTimeout( () => {
+						this.clickDates(0, end_date, excess)
+					}, 1000)
+				})
+			},
+			populateCalendar (date) {
+				let result = ''
+				this.records.forEach((data, index) => {
+					let scheduleCurrent = this.$moment(data.date).format('D')
+					if (date == scheduleCurrent) {
+						result += `<div class='${this.attr.clamp}'>${data.title}</div>`
+					}
+				})
+				return result
 			},
 			clickDates (start, end, excess) {
 				let month = this.$moment(`${this.date.year}-${this.date.month}`, 'YYYY-MM').format('M'),
@@ -156,6 +179,8 @@
 					this.date.year = this.date.year - 1
 				}
 				this.generateCalendar(this.date.year, this.date.month)
+
+				this.event_ctr += 1
 			},
 			generateNextCalendar () {
 				this.date.month = this.date.month + 1
@@ -164,15 +189,20 @@
 					this.date.year = this.date.year + 1
 				}
 				this.generateCalendar(this.date.year, this.date.month)
+
+				this.event_ctr += 1
 			},
 			clearTableRows () {
 				document.querySelectorAll(`.${this.attr.table} tbody tr`).forEach((e) => {
 					e.remove()
 				})
+			},
+			initial () {
+				this.generateCalendar(this.date.year, this.date.month)
 			}
 		},
 		mounted () {
-			this.generateCalendar(this.date.year, this.date.month)
+			this.initial()
 		}
 	}
 </script>
@@ -180,6 +210,21 @@
 <style lang="stylus" module="attr">
 	.pointer
 		cursor: pointer
+	.clamp
+		display: -webkit-box
+		-webkit-box-orient: vertical
+		overflow: hidden
+		text-overflow: ellipsis
+		-webkit-line-clamp: 1
+		border-radius: 10px
+		padding: 2px 5px
+		background-color: var(--theme_white)
+		color: var(--theme_primary)
+		margin-bottom: 5px
+		font-size: 15px
+		font-weight: var(--bold)
+		&:last-child
+			margin-bottom: 0
 	.mb
 		margin-bottom: 20px
 	.day
@@ -260,6 +305,7 @@
 				border-radius: 0 10px 10px 0
 				background-color: var(--theme_primary)
 				.table
+					table-layout: fixed
 					animation: fade 1s
 					.header
 						font-size: 18px

@@ -49,6 +49,10 @@ export default {
 			ssr: false
 		},
 		{
+			src: '~/plugins/vue-line-clamp',
+			ssr: false
+		},
+		{
 			src: '~/plugins/vue-moment'
 		},
 		{
@@ -92,7 +96,7 @@ export default {
 		loaders: {
 			cssModules: {
 				modules: {
-					localIdentName: "css__[hash:base64:12]",
+					localIdentName: "[hash:base64:12]",
 				}
 			}
 		},

@@ -113,7 +113,8 @@
 		&.disabled
 			pointer-events: none
 			&.template_1,
-			&.template_2
+			&.template_2,
+			&.template_3
 				background-color: rgba(255, 255, 255, 0.5)
 				&::before
 					opacity: 0
@@ -121,12 +122,12 @@
 			display: block
 			width: 100%
 		&.template_1
-			border: 2px solid var(--theme_info)
-			background-color: var(--theme_info)
+			border: 2px solid var(--theme_primary)
+			background-color: var(--theme_primary)
 			&:hover
 				background-color: var(--theme_white)
 				span
-					color: var(--theme_info)
+					color: var(--theme_primary)
 		&.template_2
 			border: 2px solid var(--theme_white)
 			background-color: transparent
@@ -136,6 +137,13 @@
 				background-color: var(--theme_white)
 				span
 					color: var(--theme_primary)
+		&.template_3
+			border: 2px solid var(--theme_info)
+			background-color: var(--theme_info)
+			&:hover
+				background-color: var(--theme_white)
+				span
+					color: var(--theme_info)
 		span
 			display: block
 			position: inherit

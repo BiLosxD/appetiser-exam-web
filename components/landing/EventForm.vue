@@ -1,16 +1,16 @@
 <template lang="html">
 	<client-only>
 		<ValidationObserver tag="div" ref="form">
-			<form :id="attr.form" @submit.prevent="submit()">
+			<form :id="attr.form" @submit.prevent>
 				<ValidationProvider tag="div" :class="attr.group" name="event" :rules="{ required: true }" v-slot="{ errors }">
 					<div :class="[ attr.input_wrapper, (errors && errors.length > 0) ? attr.alt : '' ]">
-						<label for="event">Event</label>
-						<input type="text" :class="attr.input" name="event" autocomplete="off" placeholder="Enter event" v-model="form_data.event_name" @input="checkValue($event)">
+						<label for="title">Event</label>
+						<input type="text" :class="attr.input" name="title" autocomplete="off" placeholder="Enter event" v-model="form_data.title" @input="checkValue($event)">
 						<transition name="slide">
 							<validation-template
 								:payload="{
 									errors: errors,
-									model: form_data.event_name
+									model: form_data.title
 								}"
 							/>
 						</transition>
@@ -68,7 +68,7 @@
 					</ValidationProvider>
 				</div>
 
-				<template v-if="range.start && range.end">
+				<template v-if="form_data.from && form_data.to">
 					<div :class="[ attr.group_flex, attr.four ]">
 						<div :class="attr.group" v-for="(day, key) in days" :key="key">
 							<div :class="attr.checkbox">
@@ -88,10 +88,19 @@
 
 				<div :class="attr.action">
 					<button-template
-						:label="'Save Event'"
-						:button_type="'submit'"
+						:class="attr.custom"
+						:label="'Add Event'"
 						:full_width="true"
 						:status="2"
+						@click.native="submit(0)"
+					/>
+					<button-template
+						:class="attr.custom"
+						:label="'Override All Events'"
+						:template="'template_3'"
+						:full_width="true"
+						:status="2"
+						@click.native="submit(1)"
 					/>
 				</div>
 			</form>
@@ -101,17 +110,19 @@
 
 <script>
 	export default {
-		data: () => ({
+		props: {
+			payload: {
+				type: Object/Array,
+				default: null
+			}
+		},
+		data: ({ payload, $moment }) => ({
 			validate: {
 				days: true
 			},
-			range: {
-				start: '',
-				end: ''
-			},
 			form_data: {
-				event_name: '',
-				from: '',
+				title: '',
+				from: $moment(payload.date).format('YYYY-MM-DD'),
 				to: '',
 				days: []
 			},
@@ -119,27 +130,26 @@
 		}),
 		methods: {
 			getDate (event, type) {
-				switch (type) {
-					case 'start':
-						this.range.start = event
-						this.range.end = ''
-						this.form_data.to = ''
-						break
-					case 'end':
-						this.range.end = event
-						break
-				}
-
-				if (type == 'end') {
+				if (type == 'start') {
+					this.form_data.to = ''
+				} else {
 					this.days = []
 					this.form_data.days = []
 					setTimeout(() => {
-						let diff = this.$moment(this.form_data.to, 'YYYY-MM-DD').diff(this.$moment(this.form_data.from, 'YYYY-MM-DD'), 'days'),
+						let from = parseInt(this.$moment(this.form_data.from).format('E')),
+							diff = this.$moment(this.form_data.to, 'YYYY-MM-DD').diff(this.$moment(this.form_data.from, 'YYYY-MM-DD'), 'days'),
 							days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-						for (let i = 0; i <= diff; i++) {
-							if (this.days.length < 7) {
-								this.days.push(days[i])
+
+						if (diff != 0) {
+							this.days.push(days[from - 1])
+							for (let i = from; i < diff + from; i++) {
+								let ctr = (i >= 7) ? i - 7 : i
+								if (this.days.length < 7) {
+									this.days.push(days[ctr])
+								}
 							}
+						} else {
+							this.days.push(days[from - 1])
 						}
 					}, 10)
 				}
@@ -163,28 +173,25 @@
 					this.validate.days = (this.form_data.days.length > 0) ? true : false
 				}
 			},
-			submit () {
+			submit (override = 0) {
+				this.getDay()
 				this.$refs.form.validate().then(success => {
-					if (!success) {
-						this.getDay()
+					if (!success || !this.validate.days) {
 						this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Please fill out the fields.', type: 'error' } })
 					} else {
-						console.log(this.form_data);
-						// this.toggleModalStatus({ type: 'loader', status: true })
-						//
-						// this.$auth.loginWith('local', { data: this.form_data }).then(({ data }) => {
-						// 	this.toggleModalStatus({ type: 'toast', status: true, item: { text: `Welcome ${data.email}`, type: 'success' } })
-						//
-						// 	setTimeout( () => {
-						// 		this.$router.push('/dashboard')
-						// 	}, 500)
-						// }).catch(err => {
-						// 	this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Invalid email address or password.', type: 'error' } })
-						// }).then(() => {
-						// 	setTimeout( () => {
-						// 		this.toggleModalStatus({ type: 'loader', status: false })
-						// 	}, 500)
-						// })
+						this.toggleModalStatus({ type: 'loader', status: true })
+						this.form_data.override = override
+
+						this.$axios.$post('events', this.form_data).then(({ record }) => {
+							this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Event added!', type: 'success' } })
+							this.$parent.initial()
+						}).catch(err => {
+							this.toggleModalStatus({ type: 'toast', status: true, item: { text: 'Oops! something went wrong', type: 'error' } })
+						}).then(() => {
+							setTimeout( () => {
+								this.toggleModalStatus({ type: 'loader', status: false })
+							}, 500)
+						})
 						this.$nextTick(() => {
 							this.$refs.form.reset()
 						})
@@ -299,4 +306,10 @@
 			max-width: calc(100% - 40px)
 			margin: 0 auto
 			bottom: 20px
+			display: flex
+			flex-flow: row wrap
+			align-items: center
+			justify-content: space-between
+			.custom
+				flex: 0 0 48.66%
 </style>
