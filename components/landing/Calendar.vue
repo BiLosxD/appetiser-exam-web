@@ -173,7 +173,9 @@
 						day.addEventListener('click', (e) => {
 							let target = e.target.querySelector(`.${this.attr.events}`)
 							this.event_payload.list = Array.from(target.querySelectorAll('li')).map(item => item.innerHTML)
-							this.toggle.event_list = true
+							if (this.event_payload.list.length > 0) {
+								this.toggle.event_list = true
+							}
 						})
 					}
 				} while (start < end + excess)
