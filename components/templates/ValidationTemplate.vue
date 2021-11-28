@@ -50,8 +50,8 @@
 			font-size: 12px
 			user-select: none
 	/**
-	 * 767px - 280px */
-	@media (max-width: 767px) and (min-width: 280px)
+	 * 1024px - 280px */
+	@media (max-width: 1024px) and (min-width: 280px)
 		.validate
 			&.adjusted
 				bottom: 5px

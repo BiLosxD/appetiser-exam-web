@@ -327,6 +327,13 @@
 	 * 1024px - 280px */
 	@media (max-width: 1024px) and (min-width: 280px)
 		#form
+			.group_flex
+				&.four
+					.group
+						flex: 0 0 calc((100% / 3) - 10px)
+						margin-bottom: 30px
+				.group
+					flex: 0 0 100%
 			.action
 				max-width: 100%
 				position: static
