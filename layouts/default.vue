@@ -20,7 +20,7 @@
 	export default {
 		head () {
 			return {
-				title: 'Appetiser Exam | BiLos'
+				title: 'Exam | BiLos'
 			}
 		}
 	}
